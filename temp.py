@@ -3,9 +3,12 @@ import json
 import os
 import re
 import sys
+import nltk
 from collections import defaultdict
 from bs4 import BeautifulSoup
 from nltk.stem import PorterStemmer
+from nltk.corpus import stopwords
+nltk.download('stopwords')
 
 ''' 
 REPORT
@@ -16,6 +19,7 @@ REPORT
 
 # REMINDERS: stem the words before adding to inverted index, dump the partial inverted indexes onto disk
 # MAKE SURE TO HAVE EITHER developer.zip or analyst.zip in the same directory as this file
+# RUN PIP INSTALL LXML to install lxml parser
 
 def buildInvertedIndex(path):
     invertedIndex = defaultdict(list)
@@ -37,21 +41,23 @@ def buildInvertedIndex(path):
                     data = json.load(jsonFile)
                     
                     # parse the html content
-                    soup = BeautifulSoup(data['content'], 'html.parser')
+                    soup = BeautifulSoup(data['content'], 'lxml')
                     text = soup.get_text()
                     
                     # tokenize the text
                     words = re.findall(r"[a-zA-Z0-9]+", text.lower())
+                    # remove stop words
+                    wordSet = set(words) - set(stopwords.words("english"))
                     
                     # iterate over the words to build the inverted index
-                    for word in words: 
+                    for word in wordSet: 
                         if word in seenWords:
                             continue
                         seenWords.add(word)
                         
                         wordFrequency = words.count(word)
                         
-                        # add to inverted index and documentIDToURL
+                        # add to inverted index and documentIDToURL``
                         invertedIndex[word].append((documentID, wordFrequency))
                         documentIDToURL[documentID] = data['url']
                         
