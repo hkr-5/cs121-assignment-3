@@ -4,6 +4,8 @@ import os
 import re
 import sys
 import bisect # to insert key in a sorted way & find seen words
+import nltk
+from nltk.corpus import stopwords
 from collections import defaultdict
 from bs4 import BeautifulSoup
 from nltk.stem import PorterStemmer
@@ -43,20 +45,19 @@ def buildInvertedIndex(path):
                     
                     # tokenize the text
                     words = re.findall(r"[a-zA-Z0-9]+", text.lower())
-                    wordsSet = set(words)
+                    wordsSet = set(words) - set(stopwords.words("english"))
                     
                     # iterate over the words to build the inverted index
                     for word in wordsSet: 
                         insertIndex = bisect.bisect_left(seenWords, word, 0, len(seenWords))
                         if (len(seenWords) <= insertIndex or seenWords[insertIndex] != word):
                             seenWords.insert(insertIndex, word)
-                        
+                    
                         # add to inverted index and documentIDToURL
                         wordFrequency = words.count(word)
                         invertedIndex[word].append((documentID, wordFrequency))
                         documentIDToURL[documentID] = data['url']
 
-                        
     # write the number of indexed documents to a file
     with open('numberOfIndexedDocuments.txt', 'w') as f:
         f.write(f"Number of Indexed Documents: {documentID}")
