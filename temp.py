@@ -3,6 +3,7 @@ import json
 import os
 import re
 import sys
+import bisect # to insert key in a sorted way & find seen words
 from collections import defaultdict
 from bs4 import BeautifulSoup
 from nltk.stem import PorterStemmer
@@ -28,7 +29,7 @@ def buildInvertedIndex(path):
             
             # check if the files are json files
             if zipInfo.filename.endswith('.json'):
-                seenWords = set()
+                seenWords = []
                 documentID += 1
                 
                 # open the json file
@@ -42,18 +43,19 @@ def buildInvertedIndex(path):
                     
                     # tokenize the text
                     words = re.findall(r"[a-zA-Z0-9]+", text.lower())
+                    wordsSet = set(words)
                     
                     # iterate over the words to build the inverted index
-                    for word in words: 
-                        if word in seenWords:
-                            continue
-                        seenWords.add(word)
-                        
-                        wordFrequency = words.count(word)
+                    for word in wordsSet: 
+                        insertIndex = bisect.bisect_left(seenWords, word, 0, len(seenWords))
+                        if (len(seenWords) <= insertIndex or seenWords[insertIndex] != word):
+                            seenWords.insert(insertIndex, word)
                         
                         # add to inverted index and documentIDToURL
+                        wordFrequency = words.count(word)
                         invertedIndex[word].append((documentID, wordFrequency))
                         documentIDToURL[documentID] = data['url']
+
                         
     # write the number of indexed documents to a file
     with open('numberOfIndexedDocuments.txt', 'w') as f:

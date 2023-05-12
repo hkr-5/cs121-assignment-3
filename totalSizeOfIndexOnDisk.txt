@@ -1,1 +1,1 @@
-Total Size of Index on Disk: 405 kilobytes
+Total Size of Index on Disk: 576 kilobytes
