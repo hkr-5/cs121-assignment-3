@@ -57,7 +57,9 @@ def buildInvertedIndex(path):
                         wordFrequency = words.count(word)
                         invertedIndex[word].append((documentID, wordFrequency))
                         documentIDToURL[documentID] = data['url']
+                        #print("yes")
 
+    print("!")
     # write the number of indexed documents to a file
     with open('numberOfIndexedDocuments.txt', 'w') as f:
         f.write(f"Number of Indexed Documents: {documentID}")
