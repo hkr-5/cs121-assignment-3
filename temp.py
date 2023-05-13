@@ -65,7 +65,7 @@ def buildInvertedIndex(path):
                 with zipFile.open(zipInfo) as jsonFile:
                     # load the json file into a dictionary
                     data = json.load(jsonFile)
-                    print(documentID, data['url'])
+                    
                     # check if url does not end with .pdf or .txt
                     if data['url'].endswith('.pdf') or data['url'].endswith('.txt'):
                         continue
