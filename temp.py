@@ -40,8 +40,16 @@ def buildInvertedIndex(path):
                     # load the json file into a dictionary
                     data = json.load(jsonFile)
                     
-                    # parse the html content
-                    soup = BeautifulSoup(data['content'], 'lxml')
+                    # check if url does not end with .pdf or .txt
+                    if data['url'].endswith('.pdf') or data['url'].endswith('.txt'):
+                        continue
+                
+                    try:
+                        # parse the html content
+                        soup = BeautifulSoup(data['content'], 'lxml')
+                    except Exception:
+                        continue
+                    
                     text = soup.get_text()
                     
                     # tokenize the text
@@ -61,21 +69,21 @@ def buildInvertedIndex(path):
                         invertedIndex[word].append((documentID, wordFrequency))
                         documentIDToURL[documentID] = data['url']
                         
-    # write the number of indexed documents to a file
-    with open('numberOfIndexedDocuments.txt', 'w') as f:
-        f.write(f"Number of Indexed Documents: {documentID}")
-        
-    # write the number of unique words to a file
-    with open('numberOfUniqueWords.txt', 'w') as f:
-        f.write(f"Number of Unique Words: {len(invertedIndex)}")
-        
-    # write the total size of the index on disk to a file
-    with open('totalSizeOfIndexOnDisk.txt', 'w') as f:
-        f.write(f"Total Size of Index on Disk: {sys.getsizeof(invertedIndex)//1024} kilobytes")
+            # write the number of indexed documents to a file
+            with open('numberOfIndexedDocuments.txt', 'w') as f:
+                f.write(f"Number of Indexed Documents: {documentID}")
+                
+            # write the number of unique words to a file
+            with open('numberOfUniqueWords.txt', 'w') as f:
+                f.write(f"Number of Unique Words: {len(invertedIndex)}")
+                
+            # write the total size of the index on disk to a file
+            with open('totalSizeOfIndexOnDisk.txt', 'w') as f:
+                f.write(f"Total Size of Index on Disk: {sys.getsizeof(invertedIndex)//1024} kilobytes")
                     
     return invertedIndex
 
 if __name__ == '__main__':
-    path = 'analyst.zip'
+    path = 'developer.zip'
     invertedIndex = buildInvertedIndex(path)
     print(invertedIndex)
