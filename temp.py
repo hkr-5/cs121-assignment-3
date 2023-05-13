@@ -21,10 +21,35 @@ REPORT
 # MAKE SURE TO HAVE EITHER developer.zip or analyst.zip in the same directory as this file
 # RUN PIP INSTALL LXML to install lxml parser
 
+''' GLOBAL VARIABLES '''
+invertedIndex = defaultdict(list)
+documentIDToURL = {}
+documentID = 0
+
+def writeToFile():
+    global invertedIndex
+    global documentIDToURL
+    
+    # write the number of indexed documents to a file
+    with open('numberOfIndexedDocuments.txt', 'w') as f:
+        f.write(f"Number of Indexed Documents: {documentID}")
+        
+    # write the number of unique words to a file
+    with open('numberOfUniqueWords.txt', 'w') as f:
+        f.write(f"Number of Unique Words: {len(invertedIndex)}")
+        
+    # write the total size of the inverted index on disk to a file
+    with open('totalSizeOfIndexOnDisk.txt', 'w') as f:
+        f.write(f"Total Size of Inverted Index on Disk: {sys.getsizeof(invertedIndex)//1024} kilobytes")
+        
+    # write the total size of the documentIDToURL on disk to a file
+    with open('totalSizeOFDocumentIDToURL.txt', 'w') as f:
+        f.write(f"Total Size of DocumentIDToURL on Disk: {sys.getsizeof(documentIDToURL)//1024} kilobytes")
+
 def buildInvertedIndex(path):
-    invertedIndex = defaultdict(list)
-    documentIDToURL = {}
-    documentID = 0
+    global invertedIndex
+    global documentIDToURL
+    global documentID
     
     # iterate over all the files in the zip folder
     with zipfile.ZipFile(path, 'r') as zipFile:
@@ -39,7 +64,7 @@ def buildInvertedIndex(path):
                 with zipFile.open(zipInfo) as jsonFile:
                     # load the json file into a dictionary
                     data = json.load(jsonFile)
-                    
+                    print(documentID, data['url'])
                     # check if url does not end with .pdf or .txt
                     if data['url'].endswith('.pdf') or data['url'].endswith('.txt'):
                         continue
@@ -50,8 +75,8 @@ def buildInvertedIndex(path):
                     except Exception:
                         continue
                     
+                    # get text from the html content
                     text = soup.get_text()
-                    
                     # tokenize the text
                     words = re.findall(r"[a-zA-Z0-9]+", text.lower())
                     # remove stop words
@@ -68,22 +93,11 @@ def buildInvertedIndex(path):
                         # add to inverted index and documentIDToURL``
                         invertedIndex[word].append((documentID, wordFrequency))
                         documentIDToURL[documentID] = data['url']
-                        
-            # write the number of indexed documents to a file
-            with open('numberOfIndexedDocuments.txt', 'w') as f:
-                f.write(f"Number of Indexed Documents: {documentID}")
-                
-            # write the number of unique words to a file
-            with open('numberOfUniqueWords.txt', 'w') as f:
-                f.write(f"Number of Unique Words: {len(invertedIndex)}")
-                
-            # write the total size of the index on disk to a file
-            with open('totalSizeOfIndexOnDisk.txt', 'w') as f:
-                f.write(f"Total Size of Index on Disk: {sys.getsizeof(invertedIndex)//1024} kilobytes")
-                    
-    return invertedIndex
+            
+            # write data to files    
+            writeToFile()
 
 if __name__ == '__main__':
     path = 'developer.zip'
-    invertedIndex = buildInvertedIndex(path)
+    buildInvertedIndex(path)
     print(invertedIndex)
