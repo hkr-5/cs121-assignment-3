@@ -29,6 +29,7 @@ documentID = 0
 def writeToFile():
     global invertedIndex
     global documentIDToURL
+    global documentID
     
     # write the number of indexed documents to a file
     with open('numberOfIndexedDocuments.txt', 'w') as f:
