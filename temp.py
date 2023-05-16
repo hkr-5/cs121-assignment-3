@@ -98,7 +98,33 @@ def buildInvertedIndex(path):
             # write data to files    
             writeToFile()
 
+def retrieve(terms):
+    terms = set(terms) - set(stopwords.words("english"))
+    
+    # find a match and calculate the sum of frequency for each page
+    hit = {}
+    for term in terms:
+        if term in invertedIndex:
+            for pageList in invertedIndex[term]:
+                if pageList[0] in hit:
+                    hit[pageList[0]] = hit[pageList[0]] + pageList[1]
+                else: 
+                    hit[pageList[0]] = pageList[1]
+    
+    # sort in descending order based on frequency 
+    hit = sorted(hit.items(), key=lambda item:item[1], reverse=True)
+    
+    # print out top 5 hits
+    rank = 0
+    while rank < 5 and rank < len(hit):
+        print('Rank', rank + 1, ':', documentIDToURL[hit[rank][0]])
+        rank += 1
+
 if __name__ == '__main__':
-    path = 'developer.zip'
+    path = 'analyst.zip'
     buildInvertedIndex(path)
-    print(invertedIndex)
+    #print(invertedIndex)
+
+    searchTerm = input('Search Term: ').lower().strip().split(' ')
+    print(searchTerm)
+    retrieve(searchTerm)
