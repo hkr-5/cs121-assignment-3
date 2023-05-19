@@ -154,8 +154,19 @@ def retrieve(terms):
         
 if __name__ == '__main__':
     path = "analyst.zip"
-    
     buildInvertedIndex(path)
 
-    searchTerm = input('Search Term: ').lower().strip().split(' ')
-    retrieve(searchTerm)
+    quit = False
+    print('-' * 10,  'Welcome', '-' * 10)
+    while(not quit):
+        searchTerm = input('Please Enter Search Term (enter \'*\' to quit): ')
+        if searchTerm == '*':
+            print("Terminating search session. See you next time!")
+            quit = True
+        else:
+            searchTerm = searchTerm.lower().strip()
+            if len(searchTerm) == 0:
+                print('Error: Please enter a valid term.')
+            else:
+                searchTerm = searchTerm.split(' ')
+                retrieve(searchTerm)
