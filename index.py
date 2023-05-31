@@ -1,23 +1,11 @@
 import zipfile
 import json
-import os
+import os, os.path
 import re
 import sys
 import nltk
 from collections import defaultdict
 from bs4 import BeautifulSoup
-from nltk.stem import PorterStemmer
-
-''' 
-REPORT
-- number of indexed documents
-- number of unique words
-- total size (in KB) of index on disk
-'''
-
-# REMINDERS: stem the words before adding to inverted index, dump the partial inverted indexes onto disk
-# MAKE SURE TO HAVE EITHER developer.zip or analyst.zip in the same directory as this file
-# RUN PIP INSTALL LXML to install lxml parser
 
 ''' GLOBAL VARIABLES '''
 invertedIndex = defaultdict(list)
@@ -26,6 +14,7 @@ documentID = 0
 partList = list()
 fileNum = 1
 fileName = "offload" + str(fileNum) + ".txt"
+TF = open("tempFiles.txt", 'w')
 
 def writeToFile():
     global invertedIndex
@@ -55,6 +44,7 @@ def buildInvertedIndex(path):
     global fileNum 
     global fileName 
     global partList
+    
     # iterate over all the files in the zip folder
     with zipfile.ZipFile(path, 'r') as zipFile:
         for zipInfo in zipFile.infolist():
@@ -66,16 +56,17 @@ def buildInvertedIndex(path):
                 
                 # If inverted index length is greater than 10000 we offload it
                 # and init a new clean dictionary to work on
-                """if len(invertedIndex) > 10000:
+                if len(invertedIndex) > 10000:
                     currFile = open(fileName, "w")
                     for word in sorted(invertedIndex.keys()):   
                         currFile.write(word + ": " + str(invertedIndex[word]) + "\n")
                     partList.append(fileName)
                     invertedIndex.clear()
                     currFile.close()
+                    TF.write(fileName + '\n')
                     fileNum += 1
-                    fileName = "offload" + str(fileNum) + ".txt"""
-                
+                    fileName = "offload" + str(fileNum) + ".txt"
+                    
                 # open the json file
                 with zipFile.open(zipInfo) as jsonFile:
                     # load the json file into a dictionary
@@ -84,7 +75,9 @@ def buildInvertedIndex(path):
                     # check if url does not end with .pdf or .txt
                     if data['url'].endswith('.pdf') or data['url'].endswith('.txt'):
                         continue
-                
+                    
+                    print(documentID, data['url'])
+                    
                     try:
                         # parse the html content
                         soup = BeautifulSoup(data['content'], 'lxml')
@@ -109,14 +102,83 @@ def buildInvertedIndex(path):
                         documentIDToURL[documentID] = data['url']
             
             # write data to files
-            writeToFile()
+            # writeToFile()
+        
+def merge(mFile, tFile):
+    # merge two files together
+    mF = open(mFile, "r") # open merge file
+    tF = open(tFile, "r") # open temp file
+    mData = mF.readline()
+    tData = tF.readline()
+    while mData != "" or tData != "": # run the loop while at least one file is not empty
+        mData11 = list()
+        tData11 = list()
+        mDataL = list()
+        tDataL = list()
+        mData = re.sub(r"(\[)*(\])*(\()*(\))*", "", mData)
+        mData1 = re.sub(r":",",",mData).strip("\n").split(",") # removes {} and splits it by ,
+        for i in mData1:
+            mDataL.append(i.strip("'' ")) # removes extra ""
+            
+        tData = re.sub(r"(\[)*(\])*(\()*(\))*", "", tData)
+        tData1 = re.sub(r":",",",tData).strip("\n").split(",") # removes {} and splits it by ,
+        for i in tData1:
+            tDataL.append(i.strip("'' ")) # removes extra ""
+    
+        if mData == "" and tData == "":
+            pass
+        elif mData == "" and tData != "":
+            for i in range(1, len(tDataL),2):
+                tData11.append((int(tDataL[i]), int(tDataL[i+1])))
+                
+            # just add the temp token info to the text file
+            with open("tempMerge.txt", "a") as f:
+                f.write(tDataL[0]+":"+str(tData11)+"\n")
+            tData = tF.readline()
+            
+        elif tData == "" and mData != "":
+            for i in range(1, len(mDataL), 2):
+                mData11.append((int(mDataL[i]), int(mDataL[i+1])))
+            # just add the merge token info to the text file
+            with open("tempMerge.txt", "a") as f:
+                f.write(mDataL[0]+":"+str(mData11)+"\n")
+            mData = mF.readline()
+        else:
+            for i in range(1, len(mDataL), 2):
+                mData11.append((int(mDataL[i]), int(mDataL[i+1])))
+            for i in range(1, len(tDataL),2):
+                tData11.append((int(tDataL[i]), int(tDataL[i+1])))
+            # check if they're the same token
+            if mDataL[0] != tDataL[0]:
+                # if first token match is tempTok then we add tempToken to the tempMerge file
+                if sorted([mDataL[0].lower(), tDataL[0].lower()])[0] != mDataL[0].lower():
+                    with open("tempMerge.txt", "a") as f:
+                        f.write(tDataL[0]+":"+str(tData11)+"\n")
+                    tData = tF.readline()
+                else:
+                    # if the first token match is mergeTok then we add mergeToken to the tempMerge file
+                    with open("tempMerge.txt", "a") as f:
+                        f.write(mDataL[0]+":"+str(mData11)+"\n")
+                    mData = mF.readline()
+                
+            else:
+                for data in tData11:
+                    mData11.append(data)
+                with open("tempMerge.txt", "a") as f:
+                    f.write(mDataL[0]+":"+str(mData11)+"\n")
+                mData = mF.readline()
+                tData = tF.readline() 
             
 
+    mF.close()
+    tF.close()
+    os.remove(mFile)
+    os.rename("tempMerge.txt", mFile)
+    
 def retrieve(terms):
-    # computer science
     validDocIDs = set()
     tempDocIDs = set()
-  
+
     # remove invalid search terms
     for term in terms:
         if term not in invertedIndex:
@@ -153,9 +215,20 @@ def retrieve(terms):
         rank += 1
         
 if __name__ == '__main__':
+    # building the inverted index
     path = "analyst.zip"
     buildInvertedIndex(path)
+    
+    '''TF.close()
+    mergeFile = "merge.txt"
+    f1 = open(mergeFile, "w")
+    f1.close()
+    ff = open("tempFiles.txt", 'r')
+    Lines = ff.readlines()
+    for i in Lines:
+        merge(mergeFile, i.strip())'''
 
+    # prompting the user for search terms
     quit = False
     print('-' * 10,  'Welcome', '-' * 10)
     while(not quit):
