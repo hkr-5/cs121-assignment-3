@@ -13,7 +13,8 @@ The program will begin to build the inverted indexes; a process that will take u
 ### How to Run Search Interface
 Make sure to run to the indexer if the inverted index is not already created. Next, navigate to the folder that contains main.py and execute the following command in the terminal.
 ``` python main.py ```
-The program will begin executing and it will ask you to enter a search query. After taking your search query, it will go through the merged inverted index and return a list of highly recommended links.
+The program will begin executing and it will ask you to enter a search query. After taking your search query, it will go through the merged inverted index and return a list of highly recommended links. Below is a visual of the search interface.
+![searchEngineInterface](https://github.com/hkr-5/cs121-assignment-3/assets/87344458/fae80fa1-2c07-4e88-ba43-a733b973df6b)
 
 ### Test Queries
 Below are the queries we used to test during development along with comments on which ones returned poor results and what we did to make them perform better.
