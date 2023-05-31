@@ -6,7 +6,7 @@ To the run the program, make sure to have the latest version of Python installed
 - NLTK: pip install nltk
 
 ### How to Run Indexer
-Navigate to the folder that contains index.py and execute the following command in the terminal.
+Have the zip folder for the crawled urls in the same directory as the index.py file. There is no need to extract the zip folder, IMPORTANT! Navigate to the folder that contains index.py and execute the following command in the terminal.
 ``` python index.py ```
 The program will begin to build the inverted indexes; a process that will take under an hour.
 

@@ -6,15 +6,17 @@ import sys
 import nltk
 from collections import defaultdict
 from bs4 import BeautifulSoup
+from nltk.stem import PorterStemmer
 
 ''' GLOBAL VARIABLES '''
+ps = PorterStemmer()
 invertedIndex = defaultdict(list)
 documentIDToURL = {}
 documentID = 0
 partList = list()
 fileNum = 1
 fileName = "offload" + str(fileNum) + ".txt"
-TF = open("tempFiles.txt", 'w')
+# TF = open("tempFiles.txt", 'w')
 
 def writeToFile():
     global invertedIndex
@@ -88,6 +90,8 @@ def buildInvertedIndex(path):
                     text = soup.get_text()
                     # tokenize the text
                     words = re.findall(r"[a-zA-Z0-9]+", text.lower())
+                    # stem all the word adding into index
+                    words = [ps.stem(word) for word in words] 
                     
                     # iterate over the words to build the inverted index
                     for word in words: 
@@ -169,13 +173,15 @@ def merge(mFile, tFile):
                 mData = mF.readline()
                 tData = tF.readline() 
             
-
     mF.close()
     tF.close()
     os.remove(mFile)
     os.rename("tempMerge.txt", mFile)
     
 def retrieve(terms):
+    # stem all the terms before querying
+    terms = [ps.stem(term) for term in terms]
+
     validDocIDs = set()
     tempDocIDs = set()
 
