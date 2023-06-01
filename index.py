@@ -198,6 +198,7 @@ def merge(mFile, tFile):
     os.rename("tempMerge.txt", mFile)
   
 def mergePartialIndexes():
+    print("Merging partial indexes...")
     TF.close()
     mergeFile = "mergedIndex.txt"
     f1 = open(mergeFile, "w")
