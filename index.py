@@ -4,6 +4,7 @@ import os, os.path
 import re
 import sys
 import nltk
+import time
 from collections import defaultdict
 from bs4 import BeautifulSoup
 from nltk.stem import PorterStemmer
@@ -15,8 +16,9 @@ documentIDToURL = {}
 documentID = 0
 fileNum = 1
 fileName = "offload" + str(fileNum) + ".txt"
-# TF = open("tempFiles.txt", 'w')
+TF = open("tempFiles.txt", 'w')
 
+''' HELPER FUNCTIONS '''
 def writeToFile():
     global invertedIndex
     global documentIDToURL
@@ -43,7 +45,8 @@ def removeUrlFragment(url):
         url = url.split("#")[0]
     return url
 
-def buildInvertedIndex(path):
+''' MAIN FUNCTIONS FOR BUILDING INVERTED INDEX '''
+def buildPartialIndexes(path):
     global invertedIndex
     global documentIDToURL
     global documentID
@@ -61,7 +64,7 @@ def buildInvertedIndex(path):
                 
                 # If inverted index length is greater than 10000 we offload it
                 # and init a new clean dictionary to work on
-                '''if len(invertedIndex) > 10000:
+                if len(invertedIndex) > 10000:
                     currFile = open(fileName, "w")
                     for word in sorted(invertedIndex.keys()):   
                         currFile.write(word + ": " + str(invertedIndex[word]) + "\n")
@@ -69,7 +72,7 @@ def buildInvertedIndex(path):
                     currFile.close()
                     TF.write(fileName + '\n')
                     fileNum += 1
-                    fileName = "offload" + str(fileNum) + ".txt"'''
+                    fileName = "offload" + str(fileNum) + ".txt"
                     
                 # open the json file
                 with zipFile.open(zipInfo) as jsonFile:
@@ -113,6 +116,16 @@ def buildInvertedIndex(path):
             
             # write data to files
             # writeToFile()
+            
+        # offload the remaining inverted index
+        currFile = open(fileName, "w")
+        for word in sorted(invertedIndex.keys()):   
+            currFile.write(word + ": " + str(invertedIndex[word]) + "\n")
+        invertedIndex.clear()
+        currFile.close()
+        TF.write(fileName + '\n')
+        fileNum += 1
+        fileName = "offload" + str(fileNum) + ".txt"
         
 def merge(mFile, tFile):
     # merge two files together
@@ -183,7 +196,17 @@ def merge(mFile, tFile):
     tF.close()
     os.remove(mFile)
     os.rename("tempMerge.txt", mFile)
-    
+  
+def mergePartialIndexes():
+    TF.close()
+    mergeFile = "mergedIndex.txt"
+    f1 = open(mergeFile, "w")
+    f1.close()
+    ff = open("tempFiles.txt", 'r')
+    for i in ff.readlines():
+        merge(mergeFile, i.strip())
+            
+''' FUNCTIONS FOR QUERYING '''
 def retrieve(terms):
     # stem all the terms before querying
     terms = [ps.stem(term) for term in terms]
@@ -241,20 +264,14 @@ def promptUser():
             else:
                 searchTerm = searchTerm.split(' ')
                 retrieve(searchTerm)
-
+        
 if __name__ == '__main__':
     # building the inverted index
     path = "./data/analyst.zip"
-    buildInvertedIndex(path)
+    buildPartialIndexes(path)
     
-    '''TF.close()
-    mergeFile = "mergedIndex.txt"
-    f1 = open(mergeFile, "w")
-    f1.close()
-    ff = open("tempFiles.txt", 'r')
-    Lines = ff.readlines()
-    for i in Lines:
-        merge(mergeFile, i.strip())'''
+    # merge the partial indexes
+    mergePartialIndexes()
 
     # user input
     promptUser()
