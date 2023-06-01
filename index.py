@@ -13,7 +13,6 @@ ps = PorterStemmer()
 invertedIndex = defaultdict(list)
 documentIDToURL = {}
 documentID = 0
-partList = list()
 fileNum = 1
 fileName = "offload" + str(fileNum) + ".txt"
 # TF = open("tempFiles.txt", 'w')
@@ -50,7 +49,6 @@ def buildInvertedIndex(path):
     global documentID
     global fileNum 
     global fileName 
-    global partList
     
     # iterate over all the files in the zip folder
     with zipfile.ZipFile(path, 'r') as zipFile:
@@ -67,7 +65,6 @@ def buildInvertedIndex(path):
                     currFile = open(fileName, "w")
                     for word in sorted(invertedIndex.keys()):   
                         currFile.write(word + ": " + str(invertedIndex[word]) + "\n")
-                    partList.append(fileName)
                     invertedIndex.clear()
                     currFile.close()
                     TF.write(fileName + '\n')
@@ -243,15 +240,15 @@ def promptUser():
                 print('Error: Please enter a valid term.')
             else:
                 searchTerm = searchTerm.split(' ')
-                retrieve(searchTerm)      
-  
+                retrieve(searchTerm)
+
 if __name__ == '__main__':
     # building the inverted index
     path = "./data/analyst.zip"
     buildInvertedIndex(path)
     
     '''TF.close()
-    mergeFile = "merge.txt"
+    mergeFile = "mergedIndex.txt"
     f1 = open(mergeFile, "w")
     f1.close()
     ff = open("tempFiles.txt", 'r')
