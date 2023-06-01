@@ -63,7 +63,7 @@ def buildInvertedIndex(path):
                 
                 # If inverted index length is greater than 10000 we offload it
                 # and init a new clean dictionary to work on
-                if len(invertedIndex) > 10000:
+                '''if len(invertedIndex) > 10000:
                     currFile = open(fileName, "w")
                     for word in sorted(invertedIndex.keys()):   
                         currFile.write(word + ": " + str(invertedIndex[word]) + "\n")
@@ -72,7 +72,7 @@ def buildInvertedIndex(path):
                     currFile.close()
                     TF.write(fileName + '\n')
                     fileNum += 1
-                    fileName = "offload" + str(fileNum) + ".txt"
+                    fileName = "offload" + str(fileNum) + ".txt"'''
                     
                 # open the json file
                 with zipFile.open(zipInfo) as jsonFile:
@@ -228,7 +228,23 @@ def retrieve(terms):
     while rank < 5 and rank < len(hit):
         print('Rank', rank + 1, ':', documentIDToURL[hit[rank][0]])
         rank += 1
-        
+
+def promptUser():
+    quit = False
+    print('-' * 10,  'Welcome', '-' * 10)
+    while (not quit):
+        searchTerm = input('Please Enter Search Term (enter \'*\' to quit): ')
+        if searchTerm == '*':
+            print("Terminating search session. See you next time!")
+            quit = True
+        else:
+            searchTerm = searchTerm.lower().strip()
+            if len(searchTerm) == 0:
+                print('Error: Please enter a valid term.')
+            else:
+                searchTerm = searchTerm.split(' ')
+                retrieve(searchTerm)      
+  
 if __name__ == '__main__':
     # building the inverted index
     path = "./data/analyst.zip"
@@ -243,18 +259,5 @@ if __name__ == '__main__':
     for i in Lines:
         merge(mergeFile, i.strip())'''
 
-    # prompting the user for search terms
-    quit = False
-    print('-' * 10,  'Welcome', '-' * 10)
-    while (not quit):
-        searchTerm = input('Please Enter Search Term (enter \'*\' to quit): ')
-        if searchTerm == '*':
-            print("Terminating search session. See you next time!")
-            quit = True
-        else:
-            searchTerm = searchTerm.lower().strip()
-            if len(searchTerm) == 0:
-                print('Error: Please enter a valid term.')
-            else:
-                searchTerm = searchTerm.split(' ')
-                retrieve(searchTerm)
+    # user input
+    promptUser()
