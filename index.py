@@ -82,8 +82,9 @@ def buildInvertedIndex(path):
                     # defragment url
                     data['url'] = removeUrlFragment(data['url'])
                     
-                    # check if url does not end with .pdf or .txt
-                    if data['url'].endswith('.pdf') or data['url'].endswith('.txt'):
+                    # check if url does not end with .pdf, .txt. php, .ff
+                    if (data['url'].endswith('.pdf') or data['url'].endswith('.txt') or
+                        data['url'].endswith('.php') or data['url'].endswith('.ff')):
                         continue
                     
                     print(documentID, data['url'])
@@ -230,7 +231,7 @@ def retrieve(terms):
         
 if __name__ == '__main__':
     # building the inverted index
-    path = "analyst.zip"
+    path = "./data/analyst.zip"
     buildInvertedIndex(path)
     
     '''TF.close()
