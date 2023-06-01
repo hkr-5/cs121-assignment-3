@@ -39,6 +39,11 @@ def writeToFile():
     with open('totalSizeOFDocumentIDToURL.txt', 'w') as f:
         f.write(f"Total Size of DocumentIDToURL on Disk: {sys.getsizeof(documentIDToURL)//1024} kilobytes")
 
+def removeUrlFragment(url):
+    if "#" in url:
+        url = url.split("#")[0]
+    return url
+
 def buildInvertedIndex(path):
     global invertedIndex
     global documentIDToURL
@@ -73,6 +78,9 @@ def buildInvertedIndex(path):
                 with zipFile.open(zipInfo) as jsonFile:
                     # load the json file into a dictionary
                     data = json.load(jsonFile)
+                    
+                    # defragment url
+                    data['url'] = removeUrlFragment(data['url'])
                     
                     # check if url does not end with .pdf or .txt
                     if data['url'].endswith('.pdf') or data['url'].endswith('.txt'):
@@ -237,7 +245,7 @@ if __name__ == '__main__':
     # prompting the user for search terms
     quit = False
     print('-' * 10,  'Welcome', '-' * 10)
-    while(not quit):
+    while (not quit):
         searchTerm = input('Please Enter Search Term (enter \'*\' to quit): ')
         if searchTerm == '*':
             print("Terminating search session. See you next time!")
