@@ -7,6 +7,7 @@ import nltk
 import time
 from collections import defaultdict
 from bs4 import BeautifulSoup
+from nltk.tokenize import word_tokenize
 from nltk.stem import PorterStemmer
 
 ''' GLOBAL VARIABLES '''
@@ -45,6 +46,10 @@ def removeUrlFragment(url):
         url = url.split("#")[0]
     return url
 
+def dumpDataStructures():
+    with open("docIDToURL.json", "w") as file:
+        json.dump(documentIDToURL, file)
+    
 ''' MAIN FUNCTIONS FOR BUILDING INVERTED INDEX '''
 def buildPartialIndexes(path):
     global invertedIndex
@@ -65,8 +70,8 @@ def buildPartialIndexes(path):
                 # If inverted index length is greater than 10000 we offload it
                 # and init a new clean dictionary to work on
                 if len(invertedIndex) > 10000:
-                    currFile = open(fileName, "w")
-                    for word in sorted(invertedIndex.keys()):   
+                    currFile = open(fileName, "w", encoding='utf-8')
+                    for word in sorted(invertedIndex.keys()):  
                         currFile.write(word + ": " + str(invertedIndex[word]) + "\n")
                     invertedIndex.clear()
                     currFile.close()
@@ -98,7 +103,9 @@ def buildPartialIndexes(path):
                     # get text from the html content
                     text = soup.get_text()
                     # tokenize the text
-                    words = re.findall(r"[a-zA-Z0-9]+", text.lower())
+                    # words = re.findall(r"[a-zA-Z0-9]+", text.lower())
+                    words = word_tokenize(text.lower())
+                    words = [word for word in words if re.match(r'^[a-zA-Z0-9]+$', word)]
                     # stem all the word adding into index
                     words = [ps.stem(word) for word in words] 
                     
@@ -118,7 +125,7 @@ def buildPartialIndexes(path):
             # writeToFile()
             
         # offload the remaining inverted index
-        currFile = open(fileName, "w")
+        currFile = open(fileName, "w", encoding='utf-8')
         for word in sorted(invertedIndex.keys()):   
             currFile.write(word + ": " + str(invertedIndex[word]) + "\n")
         invertedIndex.clear()
@@ -273,6 +280,9 @@ if __name__ == '__main__':
     
     # merge the partial indexes
     mergePartialIndexes()
+    
+    # dump the data structures to disk
+    dumpDataStructures()
 
     # user input
     promptUser()
