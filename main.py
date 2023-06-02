@@ -80,10 +80,21 @@ def retrieve(terms):
     hit = sorted(hit.items(), key=lambda item:item[1], reverse=True)
     
     # print out top 5 hits
-    rank = 0
-    while rank < 5 and rank < len(hit):
-        print('Rank', rank + 1, ':', documentIDToURL[str(hit[rank][0])])
-        rank += 1
+    # remove any duplicate pages
+    rank = []
+    numOfHit = len(hit)
+    i = 0
+    while len(rank) < 5 and len(rank) < numOfHit:
+        if documentIDToURL[str(hit[i][0])] not in rank:
+            rank.append(documentIDToURL[str(hit[i][0])])
+            numOfHit -= 1
+        i += 1
+    
+    for temp in range(len(rank)):
+        print('Rank', temp + 1, ':', rank[temp])
+    
+    if rank == []:
+        print('NO URL HITS')
 
 def promptUser():
     quit = False
