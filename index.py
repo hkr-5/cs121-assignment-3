@@ -53,7 +53,7 @@ def removeUrlFragment(url):
 def createIndexOfIndex():
     global indexOfIndex
     
-    with open('mergedIndex.txt', 'r') as f:
+    with open('preMergedIndex.txt', 'r') as f:
         offset = f.tell()
         line = f.readline()
         word = line.strip().split(':')[0]
@@ -85,6 +85,10 @@ def cleanUp():
             os.remove(file_path)
             print(f"Deleted file: {filename}")
         if filename.startswith('tempFiles') and filename.endswith('.txt'):
+            file_path = os.path.join(directory, filename)
+            os.remove(file_path)
+            print(f"Deleted file: {filename}")
+        if filename.startswith('preMergedIndex') and filename.endswith('.txt'):
             file_path = os.path.join(directory, filename)
             os.remove(file_path)
             print(f"Deleted file: {filename}")
@@ -262,7 +266,7 @@ def merge(mFile, tFile):
 def mergePartialIndexes():
     print("Merging partial indexes...")
     TF.close()
-    mergeFile = "mergedIndex.txt"
+    mergeFile = "preMergedIndex.txt"
     f1 = open(mergeFile, "w")
     f1.close()
     ff = open("tempFiles.txt", 'r')
@@ -278,7 +282,16 @@ def tfIdf():
     print("Calculating tf-idf...")
     numOfdoc = documentID
 
-    with open('mergedIndex.txt', 'r') as file:
+    directory = os.getcwd()
+    for filename in os.listdir(directory):
+        if filename.startswith('mergedIndex') and filename.endswith('.txt'):
+            file_path = os.path.join(directory, filename)
+            os.remove(file_path)
+            print(f"Deleted old mergedIndex")
+
+    updateFile = open('mergedIndex.txt', 'a')
+
+    with open('preMergedIndex.txt', 'r') as file:
         for term in indexOfIndex:
             file.seek(int(indexOfIndex[term]))
             line = file.readline()
@@ -297,9 +310,10 @@ def tfIdf():
                     listOfTuples[i] = tuple
                     i += 1
             
-            print(listOfTuples)
+                update = term + ':' + str(listOfTuples) + '\n'
+                updateFile.write(update)
 
-        
+
 if __name__ == '__main__':
     # building the inverted index
     path = "./data/analyst.zip"
@@ -314,8 +328,8 @@ if __name__ == '__main__':
     # dump the data structures to disk
     dumpDataStructures()
 
-    # delete the temporary and offloaded files
-    cleanUp()
-
     # calculate tf-idf
     tfIdf()
+    
+    # delete the temporary and offloaded files
+    cleanUp()
