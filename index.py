@@ -300,14 +300,12 @@ def tfIdf():
                 listOfTuples = eval(line.strip().split(':')[1])
 
                 i = 0
-                for tuple in listOfTuples:
-                    tuple = list(tuple)
-                    tf = tuple[1] / documentIDToSum[tuple[0]]
+                for tup in listOfTuples:
+                    tup = list(tup)
+                    tf = tup[1] / documentIDToSum[tup[0]]
                     idf = math.log(numOfdoc / (len(listOfTuples) + 1))
-                    #print(listOfTuples, len(listOfTuples))
-                    #print(term, numOfdoc, (len(listOfTuples) + 1), idf)
-                    tuple[1] = tf * idf
-                    listOfTuples[i] = tuple
+                    tup[1] = tf * idf
+                    listOfTuples[i] = tuple(tup)
                     i += 1
             
                 update = term + ':' + str(listOfTuples) + '\n'
