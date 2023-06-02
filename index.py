@@ -9,6 +9,7 @@ from collections import defaultdict
 from bs4 import BeautifulSoup
 from nltk.tokenize import word_tokenize
 from nltk.stem import PorterStemmer
+nltk.download('punkt')
 
 ''' GLOBAL VARIABLES '''
 ps = PorterStemmer()
