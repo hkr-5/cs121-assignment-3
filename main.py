@@ -55,7 +55,7 @@ def retrieve(terms):
             for docID, termTfIdf in listOfTuples:
                 if docID in validDocIDs:
                     if docID in hit:
-                        hit[docID] = hit[docID] * termTfIdf
+                        hit[docID] *= termTfIdf
                     else: 
                         hit[docID] = termTfIdf
     
@@ -81,7 +81,7 @@ def retrieve(terms):
 
 def promptUser():
     quit = False
-    print('-' * 10,  'Welcome', '-' * 10)
+    print('-' * 30,  'Welcome', '-' * 30)
     while (not quit):
         searchTerm = input('Please Enter Search Term (enter \'*\' to quit): ')
         if searchTerm == '*':
