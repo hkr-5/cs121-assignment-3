@@ -5,6 +5,7 @@ import re
 import sys
 import nltk
 import time
+import math
 from collections import defaultdict
 from bs4 import BeautifulSoup
 from nltk.tokenize import word_tokenize
@@ -120,6 +121,8 @@ def buildPartialIndexes(path):
                 with zipFile.open(zipInfo) as jsonFile:
                     # load the json file into a dictionary
                     data = json.load(jsonFile)
+                    # IMPORTANT TEXT dictionary
+                    wf = defaultdict(int)
                     
                     # defragment url
                     data['url'] = removeUrlFragment(data['url'])
@@ -154,9 +157,20 @@ def buildPartialIndexes(path):
                         
                         wordFrequency = words.count(word)
                         
-                        # add to inverted index and documentIDToURL``
+                        # add to inverted index and documentIDToURL
                         invertedIndex[word].append((documentID, wordFrequency))
                         documentIDToURL[documentID] = data['url']
+                    
+                    # IMPORTANT TEXT
+                    for heading in soup.find_all(["a", "b", "title", "strong", "h1", "h2", "h3", "h4", "h5", "h6"]):
+                        for wo in heading.text.strip().split():
+                            pat = re.compile('[a-zA-Z0-9]+')
+                            w = pat.findall(wo.lower())
+                            if w:
+                                for pw in w:
+                                    wf[ps.stem(pw)] += 100
+                    for word in wf:
+                        invertedIndex[word].append((documentID, wf[word]))
             
             # write data to files
             # writeToFile()
