@@ -5,6 +5,7 @@ from nltk.stem import PorterStemmer
 ''' GLOBAL VARIABLES '''
 ps = PorterStemmer()
 indexOfIndex = {}
+documentIDToURL = json.load(open('docIDToURL.json', 'r'))
 
 ''' HELPER FUNCTIONS '''
 def createIndexOfIndex():
@@ -25,37 +26,55 @@ def createIndexOfIndex():
 ''' FUNCTIONS FOR QUERYING '''
 # retrieve does not work yet!
 def retrieve(terms):
+    global documnentIDToURL
+    global indexOfIndex
+    
     # stem all the terms before querying
     terms = [ps.stem(term) for term in terms]
 
     validDocIDs = set()
     tempDocIDs = set()
-
-    # remove invalid search terms
+            
+    # new remove invalid search terms
     for term in terms:
-        if term not in invertedIndex:
+        if term not in indexOfIndex:
             terms.remove(term)
-
-    # gets all the valid docIDs, using AND only
+        
+    # new gets all the valid docIDs, using AND only
     for term in terms:
-        for docID, termFreq in invertedIndex[term]:
-            tempDocIDs.add(docID)
-        if validDocIDs == set():
-            validDocIDs = tempDocIDs
+        with open('mergedIndex.txt', 'r') as file:
+            file.seek(indexOfIndex[term])
+            line = file.readline()
+            
+            word = line.strip().split(':')[0]
+            listOfTuples = eval(line.strip().split(':')[1])
+            
+            for docID, termFreq in listOfTuples:
+                tempDocIDs.add(docID) 
+            if validDocIDs == set():
+                validDocIDs = tempDocIDs
+                tempDocIDs = set()
+                continue
+            
+            validDocIDs = validDocIDs.intersection(tempDocIDs)
             tempDocIDs = set()
-            continue
-        validDocIDs = validDocIDs.intersection(tempDocIDs)
-        tempDocIDs = set()
-
-    # find a match and calculate the sum of frequency for each page
+                    
+    # new find a match and calculate the sum of frequency for each page
     hit = {}
     for term in terms:
-        for docID, termFreq in invertedIndex[term]:
-            if docID in validDocIDs:
-                if docID in hit:
-                    hit[docID] = hit[docID] + termFreq
-                else: 
-                    hit[docID] = termFreq
+        with open('mergedIndex.txt', 'r') as file:
+            file.seek(indexOfIndex[term])
+            line = file.readline()
+            
+            word = line.strip().split(':')[0]
+            listOfTuples = eval(line.strip().split(':')[1])
+            
+            for docID, termFreq in listOfTuples:
+                if docID in validDocIDs:
+                    if docID in hit:
+                        hit[docID] = hit[docID] + termFreq
+                    else: 
+                        hit[docID] = termFreq
     
     # sort in descending order based on frequency 
     hit = sorted(hit.items(), key=lambda item:item[1], reverse=True)
@@ -63,7 +82,7 @@ def retrieve(terms):
     # print out top 5 hits
     rank = 0
     while rank < 5 and rank < len(hit):
-        print('Rank', rank + 1, ':', documentIDToURL[hit[rank][0]])
+        print('Rank', rank + 1, ':', documentIDToURL[str(hit[rank][0])])
         rank += 1
 
 def promptUser():
@@ -83,7 +102,7 @@ def promptUser():
                 start = time.time()
                 retrieve(searchTerm)
                 end = time.time()
-                print('Time taken:', (end - start)//1000, 'milliseconds')
+                print('Time taken:', (end - start), 'seconds')
 
 if __name__ == '__main__':
     # indexing the merged index
