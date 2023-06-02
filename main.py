@@ -4,24 +4,8 @@ from nltk.stem import PorterStemmer
 
 ''' GLOBAL VARIABLES '''
 ps = PorterStemmer()
-indexOfIndex = {}
+indexOfIndex = json.load(open('indexOfIndex.json', 'r'))
 documentIDToURL = json.load(open('docIDToURL.json', 'r'))
-
-''' HELPER FUNCTIONS '''
-def createIndexOfIndex():
-    global indexOfIndex
-    
-    with open('mergedIndex.txt', 'r') as f:
-        offset = f.tell()
-        line = f.readline()
-        word = line.strip().split(':')[0]
-        indexOfIndex[word] = offset
-        
-        while line:
-            offset = f.tell()
-            line = f.readline()
-            word = line.strip().split(':')[0]
-            indexOfIndex[word] = offset
             
 ''' FUNCTIONS FOR QUERYING '''
 def retrieve(terms):
@@ -42,7 +26,7 @@ def retrieve(terms):
     # new gets all the valid docIDs, using AND only
     for term in terms:
         with open('mergedIndex.txt', 'r') as file:
-            file.seek(indexOfIndex[term])
+            file.seek(int(indexOfIndex[term]))
             line = file.readline()
             
             word = line.strip().split(':')[0]
@@ -62,7 +46,7 @@ def retrieve(terms):
     hit = {}
     for term in terms:
         with open('mergedIndex.txt', 'r') as file:
-            file.seek(indexOfIndex[term])
+            file.seek(int(indexOfIndex[term]))
             line = file.readline()
             
             word = line.strip().split(':')[0]
@@ -114,9 +98,6 @@ def promptUser():
                 end = time.time()
                 print('Query time:', (end - start), 'seconds')
 
-if __name__ == '__main__':
-    # indexing the merged index
-    createIndexOfIndex()
-    
+if __name__ == '__main__':    
     # user input
     promptUser()

@@ -15,6 +15,7 @@ nltk.download('punkt')
 ps = PorterStemmer()
 invertedIndex = defaultdict(list)
 documentIDToURL = {}
+indexOfIndex = {}
 documentID = 0
 fileNum = 1
 fileName = "offload" + str(fileNum) + ".txt"
@@ -46,11 +47,46 @@ def removeUrlFragment(url):
     if "#" in url:
         url = url.split("#")[0]
     return url
+        
+def createIndexOfIndex():
+    global indexOfIndex
+    
+    with open('mergedIndex.txt', 'r') as f:
+        offset = f.tell()
+        line = f.readline()
+        word = line.strip().split(':')[0]
+        indexOfIndex[word] = offset
+        
+        while line:
+            offset = f.tell()
+            line = f.readline()
+            word = line.strip().split(':')[0]
+            indexOfIndex[word] = offset
 
 def dumpDataStructures():
+    global documentIDToURL
+    global indexOfIndex
+    
     with open("docIDToURL.json", "w") as file:
         json.dump(documentIDToURL, file)
-    
+        
+    with open('indexOfIndex.json', 'w') as file:
+        json.dump(indexOfIndex, file)
+
+def cleanUp():
+    print('Cleaning up...')
+    directory = os.getcwd()
+
+    for filename in os.listdir(directory):
+        if filename.startswith('offload') and filename.endswith('.txt'):
+            file_path = os.path.join(directory, filename)
+            os.remove(file_path)
+            print(f"Deleted file: {filename}")
+        if filename.startswith('tempFiles') and filename.endswith('.txt'):
+            file_path = os.path.join(directory, filename)
+            os.remove(file_path)
+            print(f"Deleted file: {filename}")
+        
 ''' MAIN FUNCTIONS FOR BUILDING INVERTED INDEX '''
 def buildPartialIndexes(path):
     global invertedIndex
@@ -222,11 +258,17 @@ def mergePartialIndexes():
         
 if __name__ == '__main__':
     # building the inverted index
-    path = "./data/developer.zip"
+    path = "./data/analyst.zip"
     buildPartialIndexes(path)
     
     # merge the partial indexes
     mergePartialIndexes()
     
+    # indexing the merge index
+    createIndexOfIndex()
+    
     # dump the data structures to disk
     dumpDataStructures()
+
+    # delete the temporary and offloaded files
+    cleanUp()
