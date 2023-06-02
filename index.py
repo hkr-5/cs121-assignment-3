@@ -16,6 +16,7 @@ nltk.download('punkt')
 ps = PorterStemmer()
 invertedIndex = defaultdict(list)
 documentIDToURL = {}
+documentIDToSum = {}
 indexOfIndex = {}
 documentID = 0
 fileNum = 1
@@ -92,6 +93,7 @@ def cleanUp():
 def buildPartialIndexes(path):
     global invertedIndex
     global documentIDToURL
+    global documentIDToSum
     global documentID
     global fileNum 
     global fileName 
@@ -159,7 +161,9 @@ def buildPartialIndexes(path):
                         
                         # add to inverted index and documentIDToURL
                         invertedIndex[word].append((documentID, wordFrequency))
-                        documentIDToURL[documentID] = data['url']
+
+                    documentIDToURL[documentID] = data['url']
+                    documentIDToSum[documentID] = (len(words))
                     
                     # IMPORTANT TEXT
                     for heading in soup.find_all(["a", "b", "title", "strong", "h1", "h2", "h3", "h4", "h5", "h6"]):
@@ -269,6 +273,32 @@ def mergePartialIndexes():
         end = time.time()
         print(f'Merged {i.strip()} in {end-start} seconds')
     ff.close()
+
+def tfIdf():
+    print("Calculating tf-idf...")
+    numOfdoc = documentID
+
+    with open('mergedIndex.txt', 'r') as file:
+        for term in indexOfIndex:
+            file.seek(int(indexOfIndex[term]))
+            line = file.readline()
+            if line != '':
+                term = line.strip().split(':')[0]
+                listOfTuples = eval(line.strip().split(':')[1])
+
+                i = 0
+                for tuple in listOfTuples:
+                    tuple = list(tuple)
+                    tf = tuple[1] / documentIDToSum[tuple[0]]
+                    idf = math.log(numOfdoc / (len(listOfTuples) + 1))
+                    #print(listOfTuples, len(listOfTuples))
+                    #print(term, numOfdoc, (len(listOfTuples) + 1), idf)
+                    tuple[1] = tf * idf
+                    listOfTuples[i] = tuple
+                    i += 1
+            
+            print(listOfTuples)
+
         
 if __name__ == '__main__':
     # building the inverted index
@@ -286,3 +316,6 @@ if __name__ == '__main__':
 
     # delete the temporary and offloaded files
     cleanUp()
+
+    # calculate tf-idf
+    tfIdf()

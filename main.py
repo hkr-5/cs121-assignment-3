@@ -52,22 +52,22 @@ def retrieve(terms):
             word = line.strip().split(':')[0]
             listOfTuples = eval(line.strip().split(':')[1])
             
-            for docID, termFreq in listOfTuples:
+            for docID, termTfIdf in listOfTuples:
                 if docID in validDocIDs:
                     if docID in hit:
-                        hit[docID] = hit[docID] + termFreq
+                        hit[docID] = hit[docID] * termTfIdf
                     else: 
-                        hit[docID] = termFreq
+                        hit[docID] = termTfIdf
     
     # sort in descending order based on frequency 
     hit = sorted(hit.items(), key=lambda item:item[1], reverse=True)
     
-    # print out top 5 hits
+    # print out top 10 hits
     # remove any duplicate pages
     rank = []
     numOfHit = len(hit)
     i = 0
-    while len(rank) < 5 and len(rank) < numOfHit:
+    while len(rank) < 10 and len(rank) < numOfHit:
         if documentIDToURL[str(hit[i][0])] not in rank:
             rank.append(documentIDToURL[str(hit[i][0])])
             numOfHit -= 1
