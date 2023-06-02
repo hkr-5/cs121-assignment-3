@@ -70,7 +70,7 @@ def buildPartialIndexes(path):
                 
                 # If inverted index length is greater than 10000 we offload it
                 # and init a new clean dictionary to work on
-                if len(invertedIndex) > 10000:
+                if len(invertedIndex) > 100000:
                     currFile = open(fileName, "w", encoding='utf-8')
                     for word in sorted(invertedIndex.keys()):  
                         currFile.write(word + ": " + str(invertedIndex[word]) + "\n")
@@ -222,7 +222,7 @@ def mergePartialIndexes():
         
 if __name__ == '__main__':
     # building the inverted index
-    path = "./data/analyst.zip"
+    path = "./data/developer.zip"
     buildPartialIndexes(path)
     
     # merge the partial indexes
