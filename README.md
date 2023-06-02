@@ -6,14 +6,14 @@ To the run the program, make sure to have the latest version of Python installed
 - NLTK: pip install nltk
 
 ### How to Run Indexer
-Have the zip folder for the crawled urls in the same directory as the index.py file. There is no need to extract the zip folder. Navigate to the folder that contains index.py and execute the following command in the terminal.
+Have the zip folder of all the crawled urls inside a folder labeled data. Make sure the data folder is at the root of the project directory (same location as main.py and index.py). Next, navigate to the folder that contains index.py and execute the following command in the terminal.
 ``` 
 python index.py 
 ```
-The program will begin to build the partial inverted index, and then merge all the inverted indexes together. After running index.py, the merged index should appear as a text file named mergedIndex.txt.
+The program will begin to build the partial inverted index, and then merge all the inverted indexes together. After running index.py, the merged index should appear as a text file named mergedIndex.txt. Another file should also be created called docIDToURL.json. 
 
 ### How to Run Search Interface
-Make sure to run to the indexer if the inverted index is not already created. Next, navigate to the folder that contains main.py and execute the following command in the terminal.
+Make sure to run to the indexer if the mergedIndex.txt file is not in the project directory. Next, navigate to the folder that contains main.py and execute the following command in the terminal.
 ``` 
 python main.py 
 ```

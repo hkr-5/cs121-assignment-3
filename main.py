@@ -24,7 +24,6 @@ def createIndexOfIndex():
             indexOfIndex[word] = offset
             
 ''' FUNCTIONS FOR QUERYING '''
-# retrieve does not work yet!
 def retrieve(terms):
     global documnentIDToURL
     global indexOfIndex
@@ -113,7 +112,7 @@ def promptUser():
                 start = time.time()
                 retrieve(searchTerm)
                 end = time.time()
-                print('Time taken:', (end - start), 'seconds')
+                print('Query time:', (end - start), 'seconds')
 
 if __name__ == '__main__':
     # indexing the merged index

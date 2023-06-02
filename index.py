@@ -213,7 +213,11 @@ def mergePartialIndexes():
     f1.close()
     ff = open("tempFiles.txt", 'r')
     for i in ff.readlines():
+        print(f'Merging {i.strip()}')
+        start = time.time()
         merge(mergeFile, i.strip())
+        end = time.time()
+        print(f'Merged {i.strip()} in {end-start} seconds')
     ff.close()
         
 if __name__ == '__main__':
