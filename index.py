@@ -191,9 +191,16 @@ def buildPartialIndexes(path):
                             w = pat.findall(wo.lower())
                             if w:
                                 for pw in w:
-                                    wf[ps.stem(pw)] += 100
+                                    wf[ps.stem(pw)] += 10
+                                    
                     for word in wf:
-                        invertedIndex[word].append((documentID, wf[word]))
+                        if word not in invertedIndex:
+                            invertedIndex[word].append((documentID, wf[word]))
+                          
+                    for word, listOfTuples in invertedIndex.items():
+                        for idx, tpl in enumerate(listOfTuples):
+                            if documentID == tpl[0]:
+                                listOfTuples[idx] = (documentID, tpl[1] + wf[word])
             
             # write data to files
             # writeToFile()
