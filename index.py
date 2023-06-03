@@ -64,6 +64,21 @@ def createIndexOfIndex():
             line = f.readline()
             word = line.strip().split(':')[0]
             indexOfIndex[word] = offset
+            
+def createIndexOfIndex2():
+    global indexOfIndex
+    
+    with open('mergedIndex.txt', 'r') as f:
+        offset = f.tell()
+        line = f.readline()
+        word = line.strip().split(':')[0]
+        indexOfIndex[word] = offset
+        
+        while line:
+            offset = f.tell()
+            line = f.readline()
+            word = line.strip().split(':')[0]
+            indexOfIndex[word] = offset
 
 def dumpDataStructures():
     global documentIDToURL
@@ -322,12 +337,15 @@ if __name__ == '__main__':
     
     # indexing the merge index
     createIndexOfIndex()
-    
-    # dump the data structures to disk
-    dumpDataStructures()
 
     # calculate tf-idf
     tfIdf()
+    
+    # indexing the new merge index with tf-idf score
+    createIndexOfIndex2()
+    
+    # dump the data structures to disk
+    dumpDataStructures()
     
     # delete the temporary and offloaded files
     cleanUp()
