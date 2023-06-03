@@ -142,8 +142,6 @@ def buildPartialIndexes(path):
                 with zipFile.open(zipInfo) as jsonFile:
                     # load the json file into a dictionary
                     data = json.load(jsonFile)
-                    # IMPORTANT TEXT dictionary
-                    wf = defaultdict(int)
                     
                     # defragment url
                     data['url'] = removeUrlFragment(data['url'])
@@ -185,6 +183,8 @@ def buildPartialIndexes(path):
                     documentIDToSum[documentID] = (len(words))
                     
                     # IMPORTANT TEXT
+                    wf = defaultdict(int)
+                    
                     for heading in soup.find_all(["a", "b", "title", "strong", "h1", "h2", "h3", "h4", "h5", "h6"]):
                         for wo in heading.text.strip().split():
                             pat = re.compile('[a-zA-Z0-9]+')
@@ -196,11 +196,12 @@ def buildPartialIndexes(path):
                     for word in wf:
                         if word not in invertedIndex:
                             invertedIndex[word].append((documentID, wf[word]))
-                          
-                    for word, listOfTuples in invertedIndex.items():
-                        for idx, tpl in enumerate(listOfTuples):
-                            if documentID == tpl[0]:
-                                listOfTuples[idx] = (documentID, tpl[1] + wf[word])
+                        else:
+                            idx = 0
+                            for tpl in invertedIndex[word]:
+                                if tpl[0] == documentID:
+                                    invertedIndex[word][idx] = (documentID, tpl[1] + wf[word])
+                                idx += 1
             
             # write data to files
             # writeToFile()
@@ -324,7 +325,10 @@ def tfIdf():
                 i = 0
                 for tup in listOfTuples:
                     tup = list(tup)
-                    tf = tup[1] / documentIDToSum[tup[0]]
+                    if documentIDToSum[tup[0]] == 0:
+                        tf = 0
+                    else:
+                        tf = tup[1] / documentIDToSum[tup[0]]
                     idf = math.log(numOfdoc / (len(listOfTuples) + 1))
                     tup[1] = tf * idf
                     listOfTuples[i] = tuple(tup)
