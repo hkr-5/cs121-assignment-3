@@ -24,7 +24,7 @@ python main.py
 ```
 The program will begin executing and it will ask you to enter a search query. After taking your search query, it will go through the merged inverted index and return a list of highly recommended links. Below is a visual of the search interface.
 
-[Search Engine Interface Picture] (https://github.com/hkr-5/cs121-assignment-3/assets/87344458/fae80fa1-2c07-4e88-ba43-a733b973df6b)
+![SearchEngineInterface](https://github.com/hkr-5/cs121-assignment-3/assets/87344458/fa7f1d6f-35ce-4f04-aa62-e18e8333d504)
 
 ### Test Queries
 Below are the queries we used to test during development along with comments on which ones returned poor results and what we did to make them perform better.
