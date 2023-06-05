@@ -1,9 +1,9 @@
 # Search Engine
 
-Team Member:
-Chris Tran, cvtran3, 47699198
-Hikaru Yamamoto, yamamoh1, 69645506
-Nam Mai, namtm, 13825230
+Team Members:
+- Chris Tran, cvtran3, 47699198
+- Hikaru Yamamoto, yamamoh1, 69645506
+- Nam Mai, namtm, 13825230
 
 ### Installation
 To the run the program, make sure to have the latest version of Python installed as well as the following dependencies:
